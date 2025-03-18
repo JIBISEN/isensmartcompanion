@@ -1,30 +1,40 @@
 package fr.isen.RAVAN.isensmartcompanion
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import fr.isen.RAVAN.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
+import androidx.compose.foundation.layout.fillMaxHeight
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,66 +42,90 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ISENSmartCompanionTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Utilisation de notre composant Greeting avec la modification
-                    Greeting(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                MainScreen()
             }
         }
     }
 }
 
-@Composable //ui interface
-fun Greeting(modifier: Modifier = Modifier) {
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScreen() {
+    val context = LocalContext.current
     val question = remember { mutableStateOf("") }
     val reponse = remember { mutableStateOf("Réponse de l'IA ici.") }
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Logo ISEN
-        Image(
-            painter = painterResource(id = R.drawable.isen), // Assurez-vous que le nom de votre fichier est correct
-            contentDescription = "Logo ISEN",
+    Scaffold() { innerPadding ->
+        Column(
             modifier = Modifier
-                .size(100.dp) // Ajustez la taille selon vos besoins
-                .padding(bottom = 16.dp)
-        )
-        // Titre
-        Text(text = "ISEN Smart Companion")
-        Spacer(modifier = Modifier.height(16.dp))
+                .padding(innerPadding)
+                .fillMaxWidth()
+                .padding(16.dp)
+                .fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f), //weight modifier
+                horizontalAlignment = Alignment.CenterHorizontally
+            )
+            {
+                // ISEN Logo
+                Image(
+                    painter = painterResource(id = R.drawable.isen),
+                    contentDescription = "Logo ISEN",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .padding(bottom = 16.dp)
+                )
+                // Title
+                Text(text = "ISEN Smart Companion")
+                Spacer(modifier = Modifier.height(16.dp))
 
-        // Champ de saisie
-        TextField(
-            value = question.value,
-            onValueChange = { question.value = it },
-            label = { Text("Posez votre question") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Bouton
-        Button(onClick = {
-            // Action à effectuer lors du clic sur le bouton
-            reponse.value = "Traitement de la question..."
-        }) {
-            Text("Envoyer")
+                // Text of the AI response
+                Text(text = reponse.value)
+            }
+            Row(modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically)
+            {
+                TextField(
+                    value = question.value,
+                    onValueChange = { question.value = it },
+                    label = { Text("Posez votre question") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.LightGray,
+                        unfocusedContainerColor = Color.LightGray,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            // Action lors du clic sur la flèche
+                            Toast.makeText(context, "Question envoyée", Toast.LENGTH_SHORT).show()
+                            reponse.value = "Vous avez demandé : ${question.value}"
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Send,
+                                contentDescription = "Envoyer",
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                    }
+                )
+            }
         }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Texte de réponse de l'IA
-        Text(text = reponse.value)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun MainScreenPreview() {
     ISENSmartCompanionTheme {
-        Greeting()
+        MainScreen()
     }
 }
