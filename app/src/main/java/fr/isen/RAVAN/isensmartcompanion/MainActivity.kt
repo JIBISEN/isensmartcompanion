@@ -59,8 +59,9 @@ import androidx.navigation.compose.rememberNavController
 import fr.isen.RAVAN.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
 import androidx.compose.ui.graphics.vector.ImageVector
 import fr.isen.RAVAN.isensmartcompanion.dataBase.NetworkEvent
+import fr.isen.RAVAN.isensmartcompanion.dataBase.toEvent
 import fr.isen.RAVAN.isensmartcompanion.network.RetrofitClient
-
+import java.io.Serializable
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -86,6 +87,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 
 @Composable
 fun MainApp() {
+    Log.d("MainApp", "MainApp called")
     val navController = rememberNavController()
 
     Scaffold(
@@ -208,47 +210,67 @@ fun MainScreen(innerPadding: PaddingValues) {
 
 @Composable
 fun EventsScreen(navController: NavController) {
+    Log.d("EventsScreen", "EventsScreen composable appelée")
     var events by remember { mutableStateOf<List<Event>>(emptyList()) }
 
+    Log.d("EventsScreen", "Début de l'appel Retrofit")
     val call = RetrofitClient.eventService.getEvents()
     call.enqueue(object : Callback<List<NetworkEvent>> {
         override fun onResponse(
             call: Call<List<NetworkEvent>>,
             response: Response<List<NetworkEvent>>
         ) {
-            Log.d("EventsScreen", "onResponse called")
+            Log.d("EventsScreen", "onResponse appelée")
+            Log.d("EventsScreen", "response.isSuccessful = ${response.isSuccessful}")
             if (response.isSuccessful) {
-                Log.d("EventsScreen", "Response is successful")
-                val networkEvents = response.body() ?: emptyList()
-                Log.d("EventsScreen", "Number of network events: ${networkEvents.size}")
-                events = networkEvents.map { it.toEvent() }
-                Log.d("EventsScreen", "Number of events: ${events.size}")
+                Log.d("EventsScreen", "Réponse réussie")
+                val networkEvents: List<NetworkEvent>? = response.body() //Ajouter le type List<NetworkEvent>?
+                Log.d("EventsScreen", "response.body() = $networkEvents")
+                if (networkEvents != null) {
+                    events = networkEvents.map { it.toEvent() }
+                    Log.d("EventsScreen", "events = $events")
+                } else {
+                    Log.e("EventsScreen", "response.body() est null")
+                }
             } else {
-                Log.e("EventsScreen", "Error: ${response.message()}")
-                Log.e("EventsScreen", "Error code: ${response.code()}")
+                Log.e("EventsScreen", "Erreur : ${response.message()}")
+                Log.e("EventsScreen", "Code d'erreur : ${response.code()}")
             }
         }
 
         override fun onFailure(call: Call<List<NetworkEvent>>, t: Throwable) {
-            Log.e("EventsScreen", "Failure: ${t.message}")
+            Log.e("EventsScreen", "Erreur de réseau ou problème serveur")
+            Log.e("EventsScreen", "Message d'erreur: ${t.message}")
+            t.printStackTrace()
         }
     })
 
+    Log.d("EventsScreen", "Avant LazyColumn")
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        LazyColumn {
-            items(events) { event ->
-                EventItem(event = event, navController = navController)
+        if (events.isNotEmpty()) {
+            LazyColumn {
+                Log.d("EventsScreen", "LazyColumn appelée")
+                items(events) { event ->
+                    Log.d("EventItem", "EventItem appelée")
+                    EventItem(event = event, navController = navController)
+                }
             }
+        } else {
+            Log.d("EventsScreen", "La liste event est vide")
+            Text(text = "Aucun evenement pour le moment")
         }
+
     }
+    Log.d("EventsScreen", "Après LazyColumn")
 }
 @Composable
 fun EventItem(event: Event, navController: NavController) {
+    Log.d("EventItem", "EventItem is called : ${event.title}")
     Card(
         modifier = Modifier
             .fillMaxWidth()

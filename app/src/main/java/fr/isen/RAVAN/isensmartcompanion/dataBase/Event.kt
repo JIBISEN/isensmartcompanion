@@ -1,19 +1,20 @@
 package fr.isen.RAVAN.isensmartcompanion
 
 import java.io.Serializable
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 data class Event(
-    val id: Int,
+    val id: String,
     val title: String,
     val description: String,
-    val date: LocalDate,
+    val date: String,
     val location: String,
     val category: String
 ) : Serializable {
     fun formatDate(): String {
-        val formatter = DateTimeFormatter.ofPattern(Constants.DATE_FORMAT)
-        return date.format(formatter)
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        return dateFormat.format(date)
     }
 }
