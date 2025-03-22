@@ -1,8 +1,8 @@
 package fr.isen.RAVAN.isensmartcompanion
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -58,6 +58,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import fr.isen.RAVAN.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
 import androidx.compose.ui.graphics.vector.ImageVector
+import fr.isen.RAVAN.isensmartcompanion.dataBase.NetworkEvent
+import fr.isen.RAVAN.isensmartcompanion.network.RetrofitClient
+
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -199,9 +205,35 @@ fun MainScreen(innerPadding: PaddingValues) {
     }
 }
 
+
 @Composable
 fun EventsScreen(navController: NavController) {
-    val events = generateDummyEvents()
+    var events by remember { mutableStateOf<List<Event>>(emptyList()) }
+
+    val call = RetrofitClient.eventService.getEvents()
+    call.enqueue(object : Callback<List<NetworkEvent>> {
+        override fun onResponse(
+            call: Call<List<NetworkEvent>>,
+            response: Response<List<NetworkEvent>>
+        ) {
+            Log.d("EventsScreen", "onResponse called")
+            if (response.isSuccessful) {
+                Log.d("EventsScreen", "Response is successful")
+                val networkEvents = response.body() ?: emptyList()
+                Log.d("EventsScreen", "Number of network events: ${networkEvents.size}")
+                events = networkEvents.map { it.toEvent() }
+                Log.d("EventsScreen", "Number of events: ${events.size}")
+            } else {
+                Log.e("EventsScreen", "Error: ${response.message()}")
+                Log.e("EventsScreen", "Error code: ${response.code()}")
+            }
+        }
+
+        override fun onFailure(call: Call<List<NetworkEvent>>, t: Throwable) {
+            Log.e("EventsScreen", "Failure: ${t.message}")
+        }
+    })
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -215,7 +247,6 @@ fun EventsScreen(navController: NavController) {
         }
     }
 }
-
 @Composable
 fun EventItem(event: Event, navController: NavController) {
     Card(
@@ -243,7 +274,6 @@ fun AgendaScreen() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Agenda Screen")
