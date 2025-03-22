@@ -1,4 +1,4 @@
-package fr.isen.RAVAN.isensmartcompanion.dataBase
+package fr.isen.RAVAN.isensmartcompanion
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,18 +9,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
 import fr.isen.RAVAN.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
 
 class EventDetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val event = intent.getSerializableExtra("event") as? Event
+        val event = intent.getSerializableExtra(Constants.EVENT_KEY) as? Event
 
         setContent {
             ISENSmartCompanionTheme {
@@ -31,8 +31,6 @@ class EventDetailActivity : ComponentActivity() {
         }
     }
 }
-
-
 
 @Composable
 fun EventDetailScreen(event: Event) {

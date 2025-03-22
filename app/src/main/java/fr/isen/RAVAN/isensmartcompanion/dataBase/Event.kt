@@ -1,4 +1,4 @@
-package fr.isen.RAVAN.isensmartcompanion.dataBase
+package fr.isen.RAVAN.isensmartcompanion
 
 import java.io.Serializable
 import java.time.LocalDate
@@ -11,9 +11,9 @@ data class Event(
     val date: LocalDate,
     val location: String,
     val category: String
-): Serializable {
+) : Serializable {
     fun formatDate(): String {
-        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val formatter = DateTimeFormatter.ofPattern(Constants.DATE_FORMAT)
         return date.format(formatter)
     }
 }

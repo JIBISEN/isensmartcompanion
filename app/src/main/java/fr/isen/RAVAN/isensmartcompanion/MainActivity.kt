@@ -8,7 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,7 +29,6 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
@@ -51,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -59,10 +58,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import fr.isen.RAVAN.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
-import fr.isen.RAVAN.isensmartcompanion.dataBase.Event
-import fr.isen.RAVAN.isensmartcompanion.dataBase.EventDetailActivity
-import fr.isen.RAVAN.isensmartcompanion.dataBase.generateDummyEvents
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -151,7 +146,6 @@ fun MainScreen(innerPadding: PaddingValues) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
-             //   .background(Color.Red), ligne de debug
         ) {
             // ISEN Logo
             Image(
@@ -231,7 +225,7 @@ fun EventItem(event: Event, context: Context) {
             .padding(8.dp)
             .clickable {
                 val intent = Intent(context, EventDetailActivity::class.java)
-                intent.putExtra("event", event)
+                intent.putExtra(Constants.EVENT_KEY, event)
                 context.startActivity(intent)
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -250,6 +244,7 @@ fun AgendaScreen() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
+
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Agenda Screen")
