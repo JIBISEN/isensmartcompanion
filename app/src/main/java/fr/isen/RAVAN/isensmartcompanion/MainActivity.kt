@@ -201,7 +201,6 @@ fun MainScreen(innerPadding: PaddingValues) {
 
 @Composable
 fun EventsScreen(navController: NavController) {
-    val context = LocalContext.current
     val events = generateDummyEvents()
     Column(
         modifier = Modifier
@@ -211,22 +210,22 @@ fun EventsScreen(navController: NavController) {
     ) {
         LazyColumn {
             items(events) { event ->
-                EventItem(event = event, context = context)
+                EventItem(event = event, navController = navController)
             }
         }
     }
 }
 
 @Composable
-fun EventItem(event: Event, context: Context) {
+fun EventItem(event: Event, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                val intent = Intent(context, EventDetailActivity::class.java)
+                val intent = Intent(navController.context, EventDetailActivity::class.java)
                 intent.putExtra(Constants.EVENT_KEY, event)
-                context.startActivity(intent)
+                navController.context.startActivity(intent)
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
