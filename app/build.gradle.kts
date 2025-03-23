@@ -1,7 +1,12 @@
+
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
+
 }
 
 android {
@@ -19,28 +24,47 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Récupérer la clé API depuis local.properties
+            val localProperties = Properties().apply {
+                load(rootProject.file("local.properties").inputStream())
+            }
+            val apiKey = localProperties.getProperty("API_KEY") ?: ""
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
+        }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Récupérer la clé API depuis local.properties
+            val localProperties = Properties().apply {
+                load(rootProject.file("local.properties").inputStream())
+            }
+            val apiKey = localProperties.getProperty("API_KEY") ?: ""
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
         }
     }
+
+    buildFeatures {
+        buildConfig = true
+        privacySandbox {
+            enable = true
+        }
+    }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
-    }
-    buildFeatures {
-        compose = true
+        jvmTarget = "17"
     }
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -58,7 +82,17 @@ dependencies {
     // OkHttp
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    // SDK Google AI Client
+    implementation("com.google.ai.client.generativeai:generativeai:0.4.4")
+    // implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    implementation("androidx.privacysandbox.ads:ads-adservices:1.1.0-beta12")
+    implementation("androidx.privacysandbox.sdkruntime:sdkruntime-core:1.0.0-alpha16")
+    implementation("androidx.privacysandbox.tools:tools-core:1.0.0-alpha12")
+
     implementation(libs.cronet.embedded)
+    implementation(libs.common)
+    implementation(libs.generativeai)
+    implementation(libs.firebase.vertexai)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

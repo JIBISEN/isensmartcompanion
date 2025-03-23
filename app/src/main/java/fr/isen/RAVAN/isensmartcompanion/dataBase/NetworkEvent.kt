@@ -17,11 +17,13 @@ data class NetworkEvent(
 )
 
 fun NetworkEvent.toEvent(): Event {
+    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val date = dateFormat.parse(this.date) ?: Date() // Utiliser une date par défaut si la conversion échoue
     return Event(
         id = this.id,
         title = this.title,
         description = this.description,
-        date = this.date,
+        date = date,
         location = this.location,
         category = this.category
     )

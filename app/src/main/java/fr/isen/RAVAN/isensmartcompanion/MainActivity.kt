@@ -7,6 +7,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.launch
+import androidx.compose.animation.core.copy
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,8 +42,10 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -58,6 +62,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import fr.isen.RAVAN.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.text
+import androidx.privacysandbox.tools.core.generator.build
+
 import fr.isen.RAVAN.isensmartcompanion.dataBase.NetworkEvent
 import fr.isen.RAVAN.isensmartcompanion.dataBase.toEvent
 import fr.isen.RAVAN.isensmartcompanion.network.RetrofitClient
@@ -65,6 +72,23 @@ import java.io.Serializable
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.common.GenerateContentResponse as CommonGenerateContentResponse
+//import com.google.ai.client.generativeai.type.GenerateContentResponse as TypeGenerateContentResponse
+import com.google.ai.client.generativeai.type.Content
+import com.google.ai.client.generativeai.type.GenerationConfig
+import com.google.ai.client.generativeai.type.SafetySetting
+import com.google.ai.client.generativeai.type.HarmCategory
+// import com.google.ai.client.generativeai.type.HarmBlockThreshold
+import com.google.ai.client.generativeai.type.content
+import com.google.ai.client.generativeai.type.asTextOrNull
+import fr.isen.RAVAN.isensmartcompanion.BuildConfig.API_KEY
+
+
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,9 +114,11 @@ fun MainApp() {
     Log.d("MainApp", "MainApp called")
     val navController = rememberNavController()
 
+    // Créer une CoroutineScope pour gérer les coroutines.
+    val scope = rememberCoroutineScope()
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController)
+            BottomNavigationBar(navController, scope)
         }
     ) { innerPadding ->
         Navigation(navController, innerPadding)
@@ -110,7 +136,7 @@ fun Navigation(navController: NavHostController, innerPadding: PaddingValues) {
 }
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
+fun BottomNavigationBar(navController: NavController, scope: CoroutineScope) {
     val screens = listOf(
         Screen.Home,
         Screen.Events,
@@ -119,16 +145,21 @@ fun BottomNavigationBar(navController: NavController) {
     )
     var selectedItem by rememberSaveable { mutableIntStateOf(0) }
 
-    NavigationBar {
+    androidx.compose.material3.NavigationBar(
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
         screens.forEachIndexed { index, screen ->
             NavigationBarItem(
-                icon = { Icon(screen.icon, contentDescription = null) },
+                icon = { androidx.compose.material3.Icon(screen.icon, contentDescription = null) },
                 label = { Text(screen.title) },
                 selected = selectedItem == index,
                 onClick = {
                     selectedItem = index
-                    navController.navigate(screen.route) {
-                        launchSingleTop = true
+                    // Utiliser la portée fournie pour lancer la coroutine de navigation.
+                    scope.launch {
+                        navController.navigate(screen.route) {
+                            launchSingleTop = true
+                        }
                     }
                 }
             )
@@ -139,8 +170,9 @@ fun BottomNavigationBar(navController: NavController) {
 @Composable
 fun MainScreen(innerPadding: PaddingValues) {
     val context = LocalContext.current
-    val question = remember { mutableStateOf("") }
-    val reponse = remember { mutableStateOf("Réponse de l'IA ici.") }
+    val question = remember { mutableStateOf("") } // État pour stocker la question de l'utilisateur
+    val generativeModel = getGenerativeModel() // Initialisation du modèle Gemini
+    val responseList = remember { mutableStateListOf<String>() } // Liste pour afficher les réponses
 
     Column(
         modifier = Modifier
@@ -152,10 +184,8 @@ fun MainScreen(innerPadding: PaddingValues) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
-            // ISEN Logo
             Image(
                 painter = painterResource(id = R.drawable.isen),
                 contentDescription = "Logo ISEN",
@@ -163,18 +193,19 @@ fun MainScreen(innerPadding: PaddingValues) {
                     .size(100.dp)
                     .padding(bottom = 16.dp)
             )
-            // Title
             Text(text = "ISEN Smart Companion !")
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Text of the AI response
-            Text(text = reponse.value)
+            // Affichage de l'historique des réponses
+            LazyColumn {
+                items(responseList) { item ->
+                    Text(text = item)
+                }
+            }
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
-        )
-        {
+        ) {
             TextField(
                 value = question.value,
                 onValueChange = { question.value = it },
@@ -191,9 +222,15 @@ fun MainScreen(innerPadding: PaddingValues) {
                 ),
                 trailingIcon = {
                     IconButton(onClick = {
-                        // Action lors du clic sur la flèche
+                        // Action lorsque l'utilisateur envoie la question
                         Toast.makeText(context, "Question envoyée", Toast.LENGTH_SHORT).show()
-                        reponse.value = "Vous avez demandé : ${question.value}"
+                        responseList.add("Vous avez demandé : ${question.value}")
+                        generateContent(
+                            generativeModel,
+                            question.value,
+                        ) { result ->
+                            responseList.add(result)
+                        }
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Send,
@@ -276,12 +313,8 @@ fun EventItem(event: Event, navController: NavController) {
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                val intent = Intent(navController.context, EventDetailActivity::class.java)
-                intent.putExtra(Constants.EVENT_KEY, event)
-                navController.context.startActivity(intent)
-            },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
+            }
+    ){
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = event.title, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
@@ -312,4 +345,42 @@ fun HistoryScreen() {
     ) {
         Text("History Screen")
     }
+}
+
+fun generateContent(
+    generativeModel: GenerativeModel,
+    userInput: String,
+    onResult: (String) -> Unit
+) {
+    val prompt = "Tu es un assistant personnel pour les élèves de l'ISEN. Ton role est d'aider les élèves au maximum. Tu dois être concis. $userInput"
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+
+            val content = content {
+                text(prompt)
+            }
+
+            val response = generativeModel.generateContent(content)
+            val text = response.text
+
+            CoroutineScope(Dispatchers.Main).launch {
+                if (text != null) {
+                    onResult(text)
+                } else {
+                    onResult("Erreur : Réponse vide ou null")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("GenerationContent", "Erreur lors de la génération de contenu", e)
+            CoroutineScope(Dispatchers.Main).launch {
+                onResult("Erreur : Impossible de joindre l'IA")
+            }
+        }
+    }
+}
+
+fun getGenerativeModel(): GenerativeModel {
+    val modelName = "gemini-1.5-flash-latest"
+    val apiKey = API_KEY // Remplace par votre clé API réelle
+    return GenerativeModel(modelName, apiKey)
 }
