@@ -85,7 +85,8 @@ import fr.isen.RAVAN.isensmartcompanion.BuildConfig.API_KEY
 import fr.isen.RAVAN.isensmartcompanion.dataBase.toEvent
 import java.text.SimpleDateFormat
 import java.util.Locale
-
+import  androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -171,77 +172,79 @@ fun BottomNavigationBar(navController: NavController, scope: CoroutineScope) {
 @Composable
 fun MainScreen(innerPadding: PaddingValues) {
     val context = LocalContext.current
-    val question = remember { mutableStateOf("") } // État pour stocker la question de l'utilisateur
-    val generativeModel = getGenerativeModel() // Initialisation du modèle Gemini
-    val responseList = remember { mutableStateListOf<String>() } // Liste pour afficher les réponses
+    val question = remember { mutableStateOf("") }
+    val generativeModel = getGenerativeModel()
+    val responseList = remember { mutableStateListOf<String>() }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
+    Scaffold(modifier = Modifier.padding(innerPadding)) { scaffoldPadding ->
         Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(scaffoldPadding)
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.isen),
-                contentDescription = "Logo ISEN",
-                modifier = Modifier
-                    .size(100.dp)
-                    .padding(bottom = 16.dp)
-            )
-            Text(text = "ISEN Smart Companion !")
-            Spacer(modifier = Modifier.height(16.dp))
-            // Affichage de l'historique des réponses
-            LazyColumn {
-                items(responseList) { item ->
-                    Text(text = item)
-                }
-            }
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextField(
-                value = question.value,
-                onValueChange = { question.value = it },
-                label = { Text("Posez votre question") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.LightGray,
-                    unfocusedContainerColor = Color.LightGray,
-                    cursorColor = Color.Black,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                trailingIcon = {
-                    IconButton(onClick = {
-                        // Action lorsque l'utilisateur envoie la question
-                        Toast.makeText(context, "Question envoyée", Toast.LENGTH_SHORT).show()
-                        responseList.add("Vous avez demandé : ${question.value}")
-                        generateContent(
-                            generativeModel,
-                            question.value,
-                        ) { result ->
-                            responseList.add(result)
-                            question.value = "" // Réinitialisation du champ de saisie
-                        }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Send,
-                            contentDescription = "Envoyer",
-                            modifier = Modifier.size(30.dp)
-                        )
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.isen),
+                    contentDescription = "Logo ISEN",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .padding(bottom = 16.dp)
+                )
+                Text(text = "ISEN Smart Companion !")
+                Spacer(modifier = Modifier.height(16.dp))
+                // Affichage de l'historique des réponses
+                LazyColumn {
+                    items(responseList) { item ->
+                        Text(text = item)
                     }
                 }
-            )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextField(
+                    value = question.value,
+                    onValueChange = { question.value = it },
+                    label = { Text("Posez votre question") },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(16.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.LightGray,
+                        unfocusedContainerColor = Color.LightGray,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            // Action lorsque l'utilisateur envoie la question
+                            Toast.makeText(context, "Question envoyée", Toast.LENGTH_SHORT).show()
+                            responseList.add("Vous avez demandé : ${question.value}")
+                            generateContent(
+                                generativeModel,
+                                question.value,
+                            ) { result ->
+                                responseList.add(result)
+                                question.value = "" // Réinitialisation du champ de saisie
+                            }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Send,
+                                contentDescription = "Envoyer",
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                    }
+                )
+            }
         }
     }
 }
