@@ -231,6 +231,7 @@ fun MainScreen(innerPadding: PaddingValues) {
                             question.value,
                         ) { result ->
                             responseList.add(result)
+                            question.value = "" // Réinitialisation du champ de saisie
                         }
                     }) {
                         Icon(
