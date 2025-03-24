@@ -1,5 +1,8 @@
 package fr.isen.RAVAN.isensmartcompanion
 
+import fr.isen.RAVAN.isensmartcompanion.dataBase.NetworkEvent
+import fr.isen.RAVAN.isensmartcompanion.network.RetrofitClient
+import fr.isen.RAVAN.isensmartcompanion.dataBase.Event
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -64,10 +67,6 @@ import fr.isen.RAVAN.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.text
 import androidx.privacysandbox.tools.core.generator.build
-
-import fr.isen.RAVAN.isensmartcompanion.dataBase.NetworkEvent
-import fr.isen.RAVAN.isensmartcompanion.dataBase.toEvent
-import fr.isen.RAVAN.isensmartcompanion.network.RetrofitClient
 import java.io.Serializable
 import retrofit2.Call
 import retrofit2.Callback
@@ -83,7 +82,9 @@ import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.asTextOrNull
 import fr.isen.RAVAN.isensmartcompanion.BuildConfig.API_KEY
-
+import fr.isen.RAVAN.isensmartcompanion.dataBase.toEvent
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -248,7 +249,9 @@ fun MainScreen(innerPadding: PaddingValues) {
 @Composable
 fun EventsScreen(navController: NavController) {
     Log.d("EventsScreen", "EventsScreen composable appelée")
-    var events by remember { mutableStateOf<List<Event>>(emptyList()) }
+    var events by remember { mutableStateOf<List<Event>?>(null) }
+    var error by remember { mutableStateOf<Boolean>(false) }
+    var isLoading by remember { mutableStateOf<Boolean>(true) }
 
     Log.d("EventsScreen", "Début de l'appel Retrofit")
     val call = RetrofitClient.eventService.getEvents()
@@ -259,19 +262,23 @@ fun EventsScreen(navController: NavController) {
         ) {
             Log.d("EventsScreen", "onResponse appelée")
             Log.d("EventsScreen", "response.isSuccessful = ${response.isSuccessful}")
+            isLoading = false
             if (response.isSuccessful) {
                 Log.d("EventsScreen", "Réponse réussie")
                 val networkEvents: List<NetworkEvent>? = response.body() //Ajouter le type List<NetworkEvent>?
                 Log.d("EventsScreen", "response.body() = $networkEvents")
                 if (networkEvents != null) {
-                    events = networkEvents.map { it.toEvent() }
+                    events = networkEvents.map { it.toEvent()}
                     Log.d("EventsScreen", "events = $events")
+                    error = false
                 } else {
                     Log.e("EventsScreen", "response.body() est null")
+                    error = true
                 }
             } else {
                 Log.e("EventsScreen", "Erreur : ${response.message()}")
                 Log.e("EventsScreen", "Code d'erreur : ${response.code()}")
+                error = true
             }
         }
 
@@ -279,6 +286,8 @@ fun EventsScreen(navController: NavController) {
             Log.e("EventsScreen", "Erreur de réseau ou problème serveur")
             Log.e("EventsScreen", "Message d'erreur: ${t.message}")
             t.printStackTrace()
+            isLoading = false
+            error = true
         }
     })
 
@@ -289,36 +298,71 @@ fun EventsScreen(navController: NavController) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (events.isNotEmpty()) {
-            LazyColumn {
-                Log.d("EventsScreen", "LazyColumn appelée")
-                items(events) { event ->
-                    Log.d("EventItem", "EventItem appelée")
-                    EventItem(event = event, navController = navController)
+        when {
+            isLoading -> {
+                Log.d("EventsScreen", "isLoading")
+                Text(text = "Chargement...")
+            }
+
+            error -> {
+                Log.d("EventsScreen", "error")
+                Text(text = "Une erreur est survenue")
+            }
+
+            events != null -> {
+                Log.d("EventsScreen", "events != null")
+                if (events!!.isNotEmpty()) {
+                    LazyColumn {
+                        Log.d("EventsScreen", "LazyColumn appelée")
+                        items(events ?: emptyList()) { event ->
+                            Log.d("EventItem", "EventItem appelée")
+                            EventItem(event = event, navController = navController)
+                        }
+                    }
+                } else {
+                    Log.d("EventsScreen", "La liste event est vide")
+                    Text(text = "Aucun événement pour le moment")
                 }
             }
-        } else {
-            Log.d("EventsScreen", "La liste event est vide")
-            Text(text = "Aucun evenement pour le moment")
-        }
 
+            else -> {
+                Log.d("EventsScreen", "else")
+                Text(text = "Une erreur inatendue est survenue")
+            }
+        }
     }
     Log.d("EventsScreen", "Après LazyColumn")
 }
+
 @Composable
 fun EventItem(event: Event, navController: NavController) {
     Log.d("EventItem", "EventItem is called : ${event.title}")
+    val format = SimpleDateFormat("dd MMMM yyyy", Locale.FRENCH)
+    val eventDate = format.format(event.date) // On formate la date pour l'afficher correctement
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
+                // Création de l'intent pour démarrer l'activité EventDetailActivity
+                val intent = Intent(context, EventDetailActivity::class.java).apply {
+                    putExtra(Constants.EVENT_KEY, event)
+                }
+                // Démarrage de l'activité
+                context.startActivity(intent)
             }
     ){
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = event.title, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = event.description)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = eventDate)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = event.category)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = event.location)
         }
     }
 }
@@ -381,6 +425,6 @@ fun generateContent(
 
 fun getGenerativeModel(): GenerativeModel {
     val modelName = "gemini-1.5-flash-latest"
-    val apiKey = API_KEY // Remplace par votre clé API réelle
+    val apiKey = API_KEY
     return GenerativeModel(modelName, apiKey)
 }

@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-
+    id("kotlin-parcelize")
 
 }
 
@@ -88,7 +88,7 @@ dependencies {
     implementation("androidx.privacysandbox.ads:ads-adservices:1.1.0-beta12")
     implementation("androidx.privacysandbox.sdkruntime:sdkruntime-core:1.0.0-alpha16")
     implementation("androidx.privacysandbox.tools:tools-core:1.0.0-alpha12")
-
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.20")
     implementation(libs.cronet.embedded)
     implementation(libs.common)
     implementation(libs.generativeai)

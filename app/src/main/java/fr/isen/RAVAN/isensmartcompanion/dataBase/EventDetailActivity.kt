@@ -1,5 +1,6 @@
 package fr.isen.RAVAN.isensmartcompanion
 
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -30,11 +31,18 @@ import androidx.compose.ui.unit.sp
 import fr.isen.RAVAN.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.Date
+import fr.isen.RAVAN.isensmartcompanion.dataBase.Event
 
 class EventDetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val event = intent.getSerializableExtra(Constants.EVENT_KEY) as? Event
+        // Récupération de l'objet Event depuis l'intent
+        val event = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(Constants.EVENT_KEY, Event::class.java)
+        } else {
+            intent.getParcelableExtra(Constants.EVENT_KEY)
+        }
         setContent {
             ISENSmartCompanionTheme {
                 if (event != null) {
@@ -79,7 +87,9 @@ fun EventDetailScreen(event: Event, onBack: () -> Unit) {
         ) {
             Text(text = event.title, fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Date : ${event.formatDate()}")
+            val format = SimpleDateFormat("dd MMMM yyyy", Locale.FRENCH)
+            val eventDate = format.format(event.date)
+            Text(text = "Date : $eventDate")
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "Lieu : ${event.location}")
             Spacer(modifier = Modifier.height(8.dp))
