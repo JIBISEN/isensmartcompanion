@@ -1,4 +1,4 @@
-package fr.isen.RAVAN.isensmartcompanion.dataBase
+package fr.isen.RAVAN.isensmartcompanion.database
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

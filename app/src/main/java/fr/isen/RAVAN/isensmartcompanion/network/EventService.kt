@@ -1,6 +1,6 @@
 package fr.isen.RAVAN.isensmartcompanion.network
 
-import fr.isen.RAVAN.isensmartcompanion.dataBase.NetworkEvent
+import fr.isen.RAVAN.isensmartcompanion.database.NetworkEvent
 import retrofit2.Call
 import retrofit2.http.GET
 

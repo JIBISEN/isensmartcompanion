@@ -14,6 +14,9 @@ cronetEmbedded = "119.6045.31"
 common = "0.10.0"
 generativeai = "0.9.0"
 firebaseVertexai = "16.2.0"
+roomCommon = "2.6.1"
+adapters = "3.2.0-alpha11"
+ksp = "2.0.21-1.0.27"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,9 +39,11 @@ cronet-embedded = { group = "org.chromium.net", name = "cronet-embedded", versio
 common = { group = "com.google.ai.client.generativeai", name = "common", version.ref = "common" }
 generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
 firebase-vertexai = { group = "com.google.firebase", name = "firebase-vertexai", version.ref = "firebaseVertexai" }
+androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
+androidx-adapters = { group = "androidx.databinding", name = "adapters", version.ref = "adapters" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}

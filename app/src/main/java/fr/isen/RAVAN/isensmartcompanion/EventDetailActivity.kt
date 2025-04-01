@@ -31,8 +31,7 @@ import androidx.compose.ui.unit.sp
 import fr.isen.RAVAN.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
 import java.text.SimpleDateFormat
 import java.util.Locale
-import java.util.Date
-import fr.isen.RAVAN.isensmartcompanion.dataBase.Event
+import fr.isen.RAVAN.isensmartcompanion.database.Event
 
 class EventDetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

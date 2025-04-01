@@ -5,7 +5,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
     id("kotlin-parcelize")
+
+
 
 }
 
@@ -28,9 +31,9 @@ android {
             // Récupérer la clé API depuis local.properties
             val localProperties = Properties().apply {
                 load(rootProject.file("local.properties").inputStream())
-            }
-            val apiKey = localProperties.getProperty("API_KEY") ?: ""
-            buildConfigField("String", "API_KEY", "\"$apiKey\"")
+                }
+                val apiKey = localProperties.getProperty("API_KEY") ?: ""
+                buildConfigField("String", "API_KEY", "\"$apiKey\"")
         }
 
         release {
@@ -65,6 +68,18 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.room.common)
+    implementation(libs.androidx.adapters)
+    // Room
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    implementation("androidx.room:room-paging:$room_version")
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
