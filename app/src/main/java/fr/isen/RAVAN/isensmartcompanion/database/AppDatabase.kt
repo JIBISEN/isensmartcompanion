@@ -1,16 +1,17 @@
 package fr.isen.RAVAN.isensmartcompanion.database
 
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import androidx.room.Room
 import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import fr.isen.RAVAN.isensmartcompanion.Converters
 
-
-@Database(entities = [Interaction::class], version = 1, exportSchema = false)
+@Database(entities = [Interaction::class, Agenda::class], version = 3, exportSchema = false) // Increment version to 3
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun interactionDao(): InteractionDao
+    abstract fun agendaDao(): AgendaDao
 
     companion object {
         @Volatile
@@ -22,7 +23,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "app_database"
-                ).build()
+                )
+                    .addMigrations(MIGRATION_1_3)
+                    .fallbackToDestructiveMigration() // Ajout de cette ligne
+                    .build()
                 INSTANCE = instance
                 instance
             }

@@ -24,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-//import fr.isen.RAVAN.isensmartcompanion.InteractionItem
 import fr.isen.RAVAN.isensmartcompanion.database.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,14 +50,14 @@ fun HistoryScreen() {
                 Icon(Icons.Filled.Delete, contentDescription = "Supprimer tout l'historique")
             }
         }
-        if(showDialog.value){
+        if (showDialog.value) {
             AlertDialog(
-                onDismissRequest = {showDialog.value = false},
+                onDismissRequest = { showDialog.value = false },
                 title = { Text("Suppression") },
                 text = { Text("Voulez vous vraiment supprimer tout l'historique ?") },
                 confirmButton = {
                     Button(onClick = {
-                        coroutineScope.launch(Dispatchers.IO){
+                        coroutineScope.launch(Dispatchers.IO) {
                             db.interactionDao().deleteAll()
                         }
                         showDialog.value = false
@@ -75,7 +74,12 @@ fun HistoryScreen() {
         }
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(interactions.value) { interaction ->
-                InteractionItem(interaction = interaction, interactionToDelete = interactionToDelete, coroutineScope = coroutineScope, db = db) //corriger le chemin
+                InteractionItem(
+                    interaction = interaction,
+                    interactionToDelete = interactionToDelete,
+                    coroutineScope = coroutineScope,
+                    db = db
+                )
             }
         }
     }

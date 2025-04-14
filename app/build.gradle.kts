@@ -70,6 +70,8 @@ android {
 dependencies {
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.adapters)
+    implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.datastore.preferences.core.android)
     // Room
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
@@ -104,6 +106,8 @@ dependencies {
     implementation("androidx.privacysandbox.sdkruntime:sdkruntime-core:1.0.0-alpha16")
     implementation("androidx.privacysandbox.tools:tools-core:1.0.0-alpha12")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.20")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("com.google.ai.client.generativeai:generativeai:0.3.0")
     implementation(libs.cronet.embedded)
     implementation(libs.common)
     implementation(libs.generativeai)

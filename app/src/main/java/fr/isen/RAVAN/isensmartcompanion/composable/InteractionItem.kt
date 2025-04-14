@@ -25,7 +25,10 @@ import fr.isen.RAVAN.isensmartcompanion.database.AppDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -35,8 +38,10 @@ fun InteractionItem(
     coroutineScope: CoroutineScope, db: AppDatabase
 ){
     var showDialogDeleteOneItem by remember { mutableStateOf(false) }
-    val format = SimpleDateFormat("dd MMMM yyyy HH:mm", Locale.FRENCH)
-    val interactionDate = format.format(interaction.timestamp) // On formate la date pour l'afficher correctement
+    // Conversion de LocalDateTime en Date
+    val date: Date = Date.from(interaction.timestamp.atZone(ZoneId.systemDefault()).toInstant())
+    val format = java.text.SimpleDateFormat("dd MMMM yyyy HH:mm", Locale.FRENCH)
+    val interactionDate = format.format(date) // On formate la date pour l'afficher correctement
     Card(
         modifier = Modifier
             .fillMaxWidth()
