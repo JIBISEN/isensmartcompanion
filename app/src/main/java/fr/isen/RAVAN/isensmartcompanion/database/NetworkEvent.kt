@@ -1,23 +1,11 @@
 package fr.isen.RAVAN.isensmartcompanion.database
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.Date
 
-@Parcelize
-data class Event(
-    val id: String,
-    val title: String,
-    val description: String,
-    val date: Date, // Maintenant, la date est stockée dans le bon type
-    val category: String, // Ajout du champ category
-    val location: String // Ajout du champ location
-) : Parcelable
-
 data class NetworkEvent(
-    val id: String,
+    val id: Int,
     val title: String,
     val description: String,
     val date: String, // La date est reçue en string depuis le réseau

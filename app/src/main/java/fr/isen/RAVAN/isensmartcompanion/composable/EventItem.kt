@@ -26,21 +26,19 @@ import java.util.Locale
 fun EventItem(event: Event, navController: NavController) {
     Log.d("EventItem", "EventItem is called : ${event.title}")
     val format = SimpleDateFormat("dd MMMM yyyy", Locale.FRENCH)
-    val eventDate = format.format(event.date) // On formate la date pour l'afficher correctement
+    val eventDate = format.format(event.date)
     val context = LocalContext.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                // Création de l'intent pour démarrer l'activité EventDetailActivity
                 val intent = Intent(context, EventDetailActivity::class.java).apply {
                     putExtra(Constants.EVENT_KEY, event)
                 }
-                // Démarrage de l'activité
                 context.startActivity(intent)
             }
-    ){
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = event.title, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))

@@ -16,7 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-//import fr.isen.RAVAN.isensmartcompanion.EventItem
+// import fr.isen.RAVAN.isensmartcompanion.EventItem
 import fr.isen.RAVAN.isensmartcompanion.database.Event
 import fr.isen.RAVAN.isensmartcompanion.database.NetworkEvent
 import fr.isen.RAVAN.isensmartcompanion.database.toEvent

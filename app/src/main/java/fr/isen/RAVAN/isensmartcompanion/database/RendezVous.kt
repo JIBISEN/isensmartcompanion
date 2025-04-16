@@ -6,11 +6,15 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import java.util.Date
 
-@Entity(tableName = "interactions")
+@Entity
 @TypeConverters(Converters::class)
-data class Interaction(
+data class RendezVous(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    @ColumnInfo(name = "question") val question: String,
-    @ColumnInfo(name = "answer") val answer: String,
-    @ColumnInfo(name = "timestamp") val timestamp: Date = Date(),
+    val userId: Int,
+    @ColumnInfo(name = "dateDebut")
+    val dateDebut: Date,
+    @ColumnInfo(name = "dateFin")
+    val dateFin: Date,
+    val description : String? = null,
+    val lieu: String? = null
 )

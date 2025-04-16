@@ -46,6 +46,7 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import fr.isen.RAVAN.isensmartcompanion.composable.AgendaScreen
 import fr.isen.RAVAN.isensmartcompanion.composable.BottomNavigationBar
+import fr.isen.RAVAN.isensmartcompanion.composable.EventDetailScreen
 import fr.isen.RAVAN.isensmartcompanion.composable.EventsScreen
 import fr.isen.RAVAN.isensmartcompanion.composable.HistoryScreen
 import fr.isen.RAVAN.isensmartcompanion.composable.MainScreen
@@ -249,7 +250,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
             composable(Screen.Events.route) { EventsScreen(navController) }
-            composable(Screen.Agenda.route) { AgendaScreen(db) }
+            composable(Screen.Agenda.route) { AgendaScreen(db, navController) }
             composable(Screen.History.route) { HistoryScreen() }
             composable(
                 route = "event_detail/{eventId}/{eventName}",
@@ -261,7 +262,7 @@ class MainActivity : ComponentActivity() {
                 val eventId = navBackStackEntry.arguments?.getInt("eventId")
                 val eventName = navBackStackEntry.arguments?.getString("eventName")
                 if (eventId != null && eventName != null) {
-                    fr.isen.RAVAN.isensmartcompanion.composable.EventDetailScreen(
+                    EventDetailScreen(
                         eventId,
                         eventName
                     )

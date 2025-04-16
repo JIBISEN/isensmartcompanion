@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AgendaDao {
     @Query("SELECT * FROM agenda")
-    fun getAll(): Flow<List<Agenda>>
+    fun getAllAgenda(): Flow<List<Agenda>>
 
     @Insert
     fun insert(agenda: Agenda)

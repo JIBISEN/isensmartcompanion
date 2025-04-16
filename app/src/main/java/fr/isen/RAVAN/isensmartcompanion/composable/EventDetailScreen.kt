@@ -33,6 +33,8 @@ import fr.isen.RAVAN.isensmartcompanion.database.Agenda
 import fr.isen.RAVAN.isensmartcompanion.database.AppDatabase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
+import java.time.LocalDateTime
+import java.util.Date
 
 @Composable
 fun EventDetailScreen(eventId: Int, eventName: String) {
@@ -84,7 +86,9 @@ fun EventDetailScreen(eventId: Int, eventName: String) {
             scope.launch(Dispatchers.IO) {
                 db.agendaDao().insert(
                     Agenda(
-                        name = eventName
+                        name = eventName,
+                        date = Date(),
+                        description = "Description de $eventName"
                     )
                 )
             }

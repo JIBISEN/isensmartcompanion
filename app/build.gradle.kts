@@ -101,6 +101,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     // SDK Google AI Client
     implementation("com.google.ai.client.generativeai:generativeai:0.4.4")
+    implementation("com.google.code.gson:gson:2.10.1")
     // implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
     implementation("androidx.privacysandbox.ads:ads-adservices:1.1.0-beta12")
     implementation("androidx.privacysandbox.sdkruntime:sdkruntime-core:1.0.0-alpha16")

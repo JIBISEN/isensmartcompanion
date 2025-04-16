@@ -39,7 +39,7 @@ fun InteractionItem(
 ){
     var showDialogDeleteOneItem by remember { mutableStateOf(false) }
     // Conversion de LocalDateTime en Date
-    val date: Date = Date.from(interaction.timestamp.atZone(ZoneId.systemDefault()).toInstant())
+    val date: Date = Date()
     val format = java.text.SimpleDateFormat("dd MMMM yyyy HH:mm", Locale.FRENCH)
     val interactionDate = format.format(date) // On formate la date pour l'afficher correctement
     Card(
