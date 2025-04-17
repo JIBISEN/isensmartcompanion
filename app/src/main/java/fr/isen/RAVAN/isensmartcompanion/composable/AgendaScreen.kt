@@ -29,6 +29,18 @@ import fr.isen.RAVAN.isensmartcompanion.database.RendezVous
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.util.Log
+import android.widget.DatePicker
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,14 +103,91 @@ fun AgendaScreen(db: AppDatabase, navController: NavController) {
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddRendezVousForm(db: AppDatabase, userId: Int) {
     var description by remember { mutableStateOf("") }
+
+    // Gestion de la date et de l'heure de début
+    val calendarStart = Calendar.getInstance()
     var startDateTime by remember { mutableStateOf(LocalDateTime.now()) }
+    val yearStart = calendarStart.get(Calendar.YEAR)
+    val monthStart = calendarStart.get(Calendar.MONTH)
+    val dayStart = calendarStart.get(Calendar.DAY_OF_MONTH)
+    val hourStart = calendarStart.get(Calendar.HOUR_OF_DAY)
+    val minuteStart = calendarStart.get(Calendar.MINUTE)
+
+    val context = LocalContext.current
+
+    val startDatePickerDialog = DatePickerDialog(
+        context,
+        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
+            startDateTime = startDateTime.withYear(selectedYear).withMonth(selectedMonth + 1)
+                .withDayOfMonth(selectedDayOfMonth)
+            Log.d("AddRendezVousForm", "startDate : $startDateTime")
+        }, yearStart, monthStart, dayStart
+    )
+
+    val startTimePickerDialog = TimePickerDialog(
+        context,
+        { _, selectedHour: Int, selectedMinute: Int ->
+            startDateTime = startDateTime.withHour(selectedHour).withMinute(selectedMinute)
+            Log.d("AddRendezVousForm", "startTime : $startDateTime")
+        }, hourStart, minuteStart, true
+    )
+
+    // Gestion de la date et de l'heure de fin
+    val calendarEnd = Calendar.getInstance()
     var endDateTime by remember { mutableStateOf(LocalDateTime.now().plusHours(1)) }
+    val yearEnd = calendarEnd.get(Calendar.YEAR)
+    val monthEnd = calendarEnd.get(Calendar.MONTH)
+    val dayEnd = calendarEnd.get(Calendar.DAY_OF_MONTH)
+    val hourEnd = calendarEnd.get(Calendar.HOUR_OF_DAY)
+    val minuteEnd = calendarEnd.get(Calendar.MINUTE)
+
+    val endDatePickerDialog = DatePickerDialog(
+        context,
+        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
+            endDateTime = endDateTime.withYear(selectedYear).withMonth(selectedMonth + 1)
+                .withDayOfMonth(selectedDayOfMonth)
+            Log.d("AddRendezVousForm", "endDate : $endDateTime")
+
+        }, yearEnd, monthEnd, dayEnd
+    )
+
+    val endTimePickerDialog = TimePickerDialog(
+        context,
+        { _, selectedHour: Int, selectedMinute: Int ->
+            endDateTime = endDateTime.withHour(selectedHour).withMinute(selectedMinute)
+            Log.d("AddRendezVousForm", "endTime : $endDateTime")
+        }, hourEnd, minuteEnd, true
+    )
+
     var location by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", Locale.FRANCE)
+
+    val startInteractionSource = remember { MutableInteractionSource() }
+    val endInteractionSource = remember { MutableInteractionSource() }
+
+    LaunchedEffect(startInteractionSource) {
+        startInteractionSource.interactions.collect {
+            if (it is PressInteraction.Release) {
+                startDatePickerDialog.show()
+                startTimePickerDialog.show()
+            }
+        }
+    }
+
+    LaunchedEffect(endInteractionSource) {
+        endInteractionSource.interactions.collect {
+            if (it is PressInteraction.Release) {
+                endDatePickerDialog.show()
+                endTimePickerDialog.show()
+            }
+        }
+    }
 
     Column(modifier = Modifier.padding(16.dp)) {
         OutlinedTextField(
@@ -109,17 +198,21 @@ fun AddRendezVousForm(db: AppDatabase, userId: Int) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-            value = startDateTime.toString(),
-            onValueChange = { /* TODO: Gérer la saisie de la date */ },
-            label = { Text("Début (YYYY-MM-DDTHH:MM:SS)") },
-            modifier = Modifier.fillMaxWidth()
+            value = startDateTime.format(formatter),
+            onValueChange = {},
+            label = { Text("Début") },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true,
+            interactionSource = startInteractionSource
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-            value = endDateTime.toString(),
-            onValueChange = { /* TODO: Gérer la saisie de la date */ },
-            label = { Text("Fin (YYYY-MM-DDTHH:MM:SS)") },
-            modifier = Modifier.fillMaxWidth()
+            value = endDateTime.format(formatter),
+            onValueChange = {},
+            label = { Text("Fin") },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true,
+            interactionSource = endInteractionSource
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
@@ -157,8 +250,8 @@ fun LocalDateTime.toJavaDate(): java.util.Date {
 fun RendezVousItem(rendezVous: RendezVous) {
     Column(modifier = Modifier.padding(8.dp)) {
         Text(text = "Rendez-vous: ${rendezVous.description}")
-        Text(text = "Début: ${rendezVous.dateDebut}") // Ligne corrigée
-        Text(text = "Fin: ${rendezVous.dateFin}") // Ligne corrigée
-        Text(text = "Lieu: ${rendezVous.lieu ?: "Non spécifié"}") // ligne corrigée
+        Text(text = "Début: ${rendezVous.dateDebut}")
+        Text(text = "Fin: ${rendezVous.dateFin}")
+        Text(text = "Lieu: ${rendezVous.lieu ?: "Non spécifié"}")
     }
 }
