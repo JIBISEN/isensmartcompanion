@@ -5,7 +5,7 @@ import java.util.Locale
 import java.util.Date
 
 data class NetworkEvent(
-    val id: Int,
+    val id: String,
     val title: String,
     val description: String,
     val date: String, // La date est reçue en string depuis le réseau
@@ -21,7 +21,7 @@ fun NetworkEvent.toEvent(): Event {
         Date() // On donne une date de base si l'analyse echoue
     }
     return Event(
-        id = id,
+        eventId = id,
         title = title,
         description = description,
         date = parsedDate, // La date parsée est utilisée

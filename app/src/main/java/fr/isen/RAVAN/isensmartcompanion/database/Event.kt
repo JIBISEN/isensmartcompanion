@@ -11,6 +11,7 @@ import java.util.Date
 @Entity(tableName = "event") // Nom de la table dans la base de données
 data class Event(
     @PrimaryKey(autoGenerate = true) val id: Int = 0, // Clé primaire, auto-générée
+    @ColumnInfo(name = "event_id") val eventId: String,
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "description") val description: String,
     @ColumnInfo(name = "date") val date: Date, // Date de l'événement
