@@ -29,8 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import fr.isen.RAVAN.isensmartcompanion.data.EventPreferences
-import fr.isen.RAVAN.isensmartcompanion.database.Agenda
 import fr.isen.RAVAN.isensmartcompanion.database.AppDatabase
+import fr.isen.RAVAN.isensmartcompanion.database.Event
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import java.time.LocalDateTime
@@ -84,10 +84,14 @@ fun EventDetailScreen(eventId: Int, eventName: String) {
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
             scope.launch(Dispatchers.IO) {
-                db.agendaDao().insert(
-                    Agenda(
-                        name = eventName,
+                db.eventDao().insertEvent(
+                    Event(
+                        title = eventName,
                         date = Date(),
+                        endDate = Date(),
+                        isMeeting = false,
+                        registered = false,
+                        location = "",
                         description = "Description de $eventName"
                     )
                 )

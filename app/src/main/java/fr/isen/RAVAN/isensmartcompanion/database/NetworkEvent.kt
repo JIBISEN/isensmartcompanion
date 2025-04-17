@@ -26,6 +26,9 @@ fun NetworkEvent.toEvent(): Event {
         description = description,
         date = parsedDate, // La date parsée est utilisée
         category = category, // Ajout du champ category
+        endDate = parsedDate,
+        isMeeting = false,
+        registered = false,
         location = location // Ajout du champ location
     )
 }

@@ -10,17 +10,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import fr.isen.RAVAN.isensmartcompanion.database.Agenda
+import fr.isen.RAVAN.isensmartcompanion.database.Event
 
 @Composable
-fun AgendaItem(agenda: Agenda) {
+fun AgendaItem(event: Event) {
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = agenda.name, fontWeight = FontWeight.Bold)
+            Text(text = event.title, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = agenda.description)
+            Text(text = event.description)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = agenda.location ?: "Pas de lieu") // Gestion de la valeur nullable
+            Text(text = event.location ?: "Pas de lieu") // Gestion de la valeur nullable
         }
     }
 }

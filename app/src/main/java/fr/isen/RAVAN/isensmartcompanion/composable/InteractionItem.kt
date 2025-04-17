@@ -72,7 +72,7 @@ fun InteractionItem(
                     confirmButton = {
                         Button(onClick = {
                             coroutineScope.launch(Dispatchers.IO){
-                                db.interactionDao().delete(interaction)
+                                db.interactionDao().delete(interaction.id)
                             }
                             interactionToDelete.value = null
                             showDialogDeleteOneItem = false

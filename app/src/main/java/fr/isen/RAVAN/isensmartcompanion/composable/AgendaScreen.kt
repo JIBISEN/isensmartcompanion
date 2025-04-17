@@ -21,11 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import fr.isen.RAVAN.isensmartcompanion.database.Agenda
 import fr.isen.RAVAN.isensmartcompanion.database.AppDatabase
-import fr.isen.RAVAN.isensmartcompanion.database.Event
-import fr.isen.RAVAN.isensmartcompanion.database.Inscription
-import fr.isen.RAVAN.isensmartcompanion.database.RendezVous
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -37,7 +33,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import java.time.ZoneId
+import fr.isen.RAVAN.isensmartcompanion.database.Event
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
@@ -47,16 +43,13 @@ import java.util.Locale
 fun AgendaScreen(db: AppDatabase, navController: NavController) {
     val userId = 0
     // Récupération des inscriptions de l'utilisateur
-    val inscriptionsFlow: Flow<List<Inscription>> = db.inscriptionDao().getInscriptionsByUserId(userId)
+    val inscriptionsFlow: Flow<List<Event>> =
+        db.eventDao().getAllEventsRegistered()
     val inscriptions by inscriptionsFlow.collectAsState(initial = emptyList())
 
     // Récupération des RendezVous de l'utilisateur
-    val rendezVousFlow: Flow<List<RendezVous>> = db.rendezVousDao().getRendezVousByUserId(userId)
+    val rendezVousFlow: Flow<List<Event>> = db.eventDao().getAllEventsFromMeeting()
     val rendezVousList by rendezVousFlow.collectAsState(initial = emptyList())
-
-    // Récupération des Agendas
-    val agendasFlow: Flow<List<Agenda>> = db.agendaDao().getAllAgenda()
-    val agendas by agendasFlow.collectAsState(initial = emptyList())
 
     var showAddRendezVousForm by remember { mutableStateOf(false) }
 
@@ -69,25 +62,11 @@ fun AgendaScreen(db: AppDatabase, navController: NavController) {
         }
         Spacer(modifier = Modifier.padding(16.dp))
 
-        // Affichage des événements inscrits
+        // Affichage des inscriptions
         Text(text = "Mes Inscriptions")
         LazyColumn(modifier = Modifier.padding(16.dp)) {
             items(inscriptions) { inscription ->
-                // Récupération de l'événement correspondant à l'inscription
-                val event: Event? = db.eventDao().getEventById(inscription.eventId).collectAsState(initial = null).value
-                if (event != null) {
-                    EventItem(event = event, navController = navController)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.padding(16.dp))
-
-        // Affichage des éléments de l'agenda
-        Text(text = "Mon Agenda")
-        LazyColumn(modifier = Modifier.padding(16.dp)) {
-            items(agendas) { agenda ->
-                AgendaItem(agenda = agenda)
+                RendezVousItem(inscription)
             }
         }
 
@@ -224,15 +203,16 @@ fun AddRendezVousForm(db: AppDatabase, userId: Int) {
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
             scope.launch {
-                db.rendezVousDao().insertRendezVous(
-                    RendezVous(
-                        userId = userId,
-                        description = description,
-                        dateDebut = startDateTime.toJavaDate(),
-                        dateFin = endDateTime.toJavaDate(),
-                        lieu = location
-                    )
+                val meeting = Event(
+                    title = "Rendez-vous",
+                    description = description,
+                    date = startDateTime.toJavaDate(),
+                    endDate = endDateTime.toJavaDate(),
+                    location = location,
+                    isMeeting = true,
+                    registered = false
                 )
+                db.eventDao().insertEvent(meeting)
             }
             description = ""
             location = ""
@@ -247,11 +227,11 @@ fun LocalDateTime.toJavaDate(): java.util.Date {
 }
 
 @Composable
-fun RendezVousItem(rendezVous: RendezVous) {
+fun RendezVousItem(rendezVous: Event) {
     Column(modifier = Modifier.padding(8.dp)) {
         Text(text = "Rendez-vous: ${rendezVous.description}")
-        Text(text = "Début: ${rendezVous.dateDebut}")
-        Text(text = "Fin: ${rendezVous.dateFin}")
-        Text(text = "Lieu: ${rendezVous.lieu ?: "Non spécifié"}")
+        Text(text = "Début: ${rendezVous.date}")
+        Text(text = "Fin: ${rendezVous.endDate}")
+        Text(text = "Lieu: ${rendezVous.location ?: "Non spécifié"}")
     }
 }

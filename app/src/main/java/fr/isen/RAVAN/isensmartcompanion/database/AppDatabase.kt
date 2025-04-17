@@ -7,16 +7,13 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [Agenda::class, Interaction::class, Inscription::class, RendezVous::class, Event::class],
-    version = 12,
+    entities = [Event::class, Interaction::class],
+    version = 13,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun agendaDao(): AgendaDao
     abstract fun interactionDao(): InteractionDao
-    abstract fun inscriptionDao(): InscriptionDao
-    abstract fun rendezVousDao(): RendezVousDao
     abstract fun eventDao(): EventDao
 
     companion object {
